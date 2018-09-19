@@ -12,11 +12,11 @@ if [[ ! -e /config/qBittorrent/config/qBittorrent.conf ]]; then
 fi
 
 # Set qBittorrent WebUI and Incoming ports
-if [ ! -z "${WEBUI_PORT}" ]; then
+if [ -n "${WEBUI_PORT}" ]; then
   webui_port_exist=$(grep -m 1 "WebUI\Port=${WEBUI_PORT}" /config/qBittorrent/config/qBittorrent.conf)
   if [[ -z "${webui_port_exist}" ]]; then
     webui_exist=$(grep -m 1 'WebUI\Port' /config/qBittorrent/config/qBittorrent.conf)
-    if [[ ! -z "${webui_exist}" ]]; then
+    if [[ -n "${webui_exist}" ]]; then
       # Get line number of WebUI Port
       LINE_NUM=$(grep -Fn -m 1 'WebUI\Port' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
       sed -i "${LINE_NUM}s@.*@WebUI\Port=${WEBUI_PORT}\n@" /config/qBittorrent/config/qBittorrent.conf
@@ -26,11 +26,11 @@ if [ ! -z "${WEBUI_PORT}" ]; then
   fi
 fi
 
-if [ ! -z "${INCOMING_PORT}" ]; then
+if [ -n "${INCOMING_PORT}" ]; then
   incoming_port_exist=$(grep -m 1 "Connection\PortRangeMin=${INCOMING_PORT}" /config/qBittorrent/config/qBittorrent.conf)
   if [[ -z "${incoming_port_exist}" ]]; then
     incoming_exist=$(grep -m 1 'Connection\PortRangeMin' /config/qBittorrent/config/qBittorrent.conf)
-    if [[ ! -z "${incoming_exist}" ]]; then
+    if [[ -n "${incoming_exist}" ]]; then
       # Get line number of Incoming
       LINE_NUM=$(grep -Fn -m 1 'Connection\PortRangeMin' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
       sed -i "${LINE_NUM}s@.*@Connection\PortRangeMin=${INCOMING_PORT}\n@" /config/qBittorrent/config/qBittorrent.conf
