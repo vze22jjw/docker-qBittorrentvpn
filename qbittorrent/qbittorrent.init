@@ -28,7 +28,7 @@ QBTLOG="qbittorrent-daemon.log"
 
 DAEMON="/usr/bin/qbittorrent-nox"
 DAEMON_ARGS="--profile=/config"
-DAEMONSTRING="${DAEMON} ${DAEMON}_ARGS >> ${QBTLOGPATH}${QBTLOG} 2>&1"
+DAEMONSTRING="${DAEMON} ${DAEMON_ARGS} >> ${QBTLOGPATH}${QBTLOG} 2>&1"
 
 export DBUS_SESSION_BUS_ADDRESS=""
 
