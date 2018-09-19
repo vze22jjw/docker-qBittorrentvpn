@@ -1,4 +1,6 @@
 #!/bin/bash
+CONF_FILE="/config/qBittorrent/config/qBittorrent.conf"
+
 if [[ ! -e /config/qBittorrent ]]; then
   mkdir -p /config/qBittorrent/config/
   chown -R "${PUID}":"${PGID}" /config/qBittorrent
@@ -6,42 +8,49 @@ else
   chown -R "${PUID}":"${PGID}" /config/qBittorrent
 fi
 
-if [[ ! -e /config/qBittorrent/config/qBittorrent.conf ]]; then
-  cp /etc/qbittorrent/qBittorrent.conf /config/qBittorrent/config/qBittorrent.conf
-  chmod 644 /config/qBittorrent/config/qBittorrent.conf
+if [[ ! -e "${CONF_FILE}" ]]; then
+  cp /etc/qbittorrent/qBittorrent.conf "${CONF_FILE}"
+  chmod 644 "${CONF_FILE}"
 fi
 
 # Set qBitTorrent WebUI port
-if [ -n "${WEBUI_PORT}" ]; then
-  webui_port_exist=$(grep -m 1 "WebUI\\\Port=${WEBUI_PORT}" /config/qBittorrent/config/qBittorrent.conf)
-  if [[ -z "${webui_port_exist}" ]]; then
-    webui_exist=$(grep -m 1 'WebUI\Port' /config/qBittorrent/config/qBittorrent.conf)
-    if [[ -n "${webui_exist}" ]]; then
+echo "[info] qBittorrent WebUI port: ${WEBUI_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
+# Is the WEBUI_PORT variable set?
+if [[ -n "${WEBUI_PORT}" ]]; then
+  # Is the webui port already set correctly?
+  if ! grep -q -m 1 "WebUI\\\Port=${WEBUI_PORT}" "${CONF_FILE}"; then
+    # Is the webui port config option in the file?
+    if grep -q -m 1 'WebUI\Port' "${CONF_FILE}"; then
       # Get line number of WebUI Port
-      LINE_NUM=$(grep -Fn -m 1 'WebUI\Port' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
-      sed -i "${LINE_NUM}s@.*@WebUI\Port=${WEBUI_PORT}\n@" /config/qBittorrent/config/qBittorrent.conf
+      LINE_NUM=$(grep -Fn -m 1 'WebUI\Port' "${CONF_FILE}" | cut -d: -f 1)
+      sed -i "${LINE_NUM}s@.*@WebUI\Port=${WEBUI_PORT}\n@" "${CONF_FILE}"
+      echo "[info] Modified existing WebUI Port in qBittorrent config." | ts '%Y-%m-%d %H:%M:%.S'
     else
-      echo "WebUI\Port=${WEBUI_PORT}" >> /config/qBittorrent/config/qBittorrent.conf
+      echo "WebUI\Port=${WEBUI_PORT}" >> "${CONF_FILE}"
+      echo "[info] Added WebUI Port to qBittorrent config." | ts '%Y-%m-%d %H:%M:%.S'
     fi
   fi
 fi
-echo "[info] qBittorrent WebUI port: ${WEBUI_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
 
 # Set qBitTorrent incoming port
-if [ -n "${INCOMING_PORT}" ]; then
-  incoming_port_exist=$(grep -m 1 "Connection\\\PortRangeMin=${INCOMING_PORT}" /config/qBittorrent/config/qBittorrent.conf)
-  if [[ -z "${incoming_port_exist}" ]]; then
-    incoming_exist=$(grep -m 1 'Connection\PortRangeMin' /config/qBittorrent/config/qBittorrent.conf)
-    if [[ -n "${incoming_exist}" ]]; then
+echo "[info] qBittorrent incoming port: ${INCOMING_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
+
+# Is the INCOMING_PORT set?
+if [[ -n "${INCOMING_PORT}" ]]; then
+  # Is the incoming port set correctly?
+  if ! grep -q -m 1 "Connection\\\PortRangeMin=${INCOMING_PORT}" "${CONF_FILE}"; then
+    # Is incoming port config option in the file?
+    if grep -q -m 1 'Connection\PortRangeMin' "${CONF_FILE}"; then
       # Get line number of Incoming
-      LINE_NUM=$(grep -Fn -m 1 'Connection\PortRangeMin' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
-      sed -i "${LINE_NUM}s@.*@Connection\PortRangeMin=${INCOMING_PORT}\n@" /config/qBittorrent/config/qBittorrent.conf
+      LINE_NUM=$(grep -Fn -m 1 'Connection\PortRangeMin' "${CONF_FILE}" | cut -d: -f 1)
+      sed -i "${LINE_NUM}s@.*@Connection\PortRangeMin=${INCOMING_PORT}\n@" "${CONF_FILE}"
+      echo "[info] Modified existing PortRangeMin in qBittorrent config." | ts '%Y-%m-%d %H:%M:%.S'
     else
-      echo "Connection\PortRangeMin=${INCOMING_PORT}" >> /config/qBittorrent/config/qBittorrent.conf
+      echo "Connection\PortRangeMin=${INCOMING_PORT}" >> "${CONF_FILE}"
+      echo "[info] Added PortRangeMin to qBittorrent config." | ts '%Y-%m-%d %H:%M:%.S'
     fi
   fi
 fi
-echo "[info] qBittorrent incoming port: ${INCOMING_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
 
 echo "[info] Starting qBittorrent daemon..." | ts '%Y-%m-%d %H:%M:%.S'
 /bin/bash /etc/qbittorrent/qbittorrent.init start
