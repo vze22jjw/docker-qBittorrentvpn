@@ -50,38 +50,38 @@ umask 002
 do_start()
 {
 
-	#Check if log path exists. If it doesn't exist, create it.
-	if [ ! -e "${QBTLOGPATH}" ]; then
-		mkdir -p "${QBTLOGPATH}"
-		chown -R "${PUID}":"${PGID}" /config/qBittorrent
-	fi
+  #Check if log path exists. If it doesn't exist, create it.
+  if [ ! -e "${QBTLOGPATH}" ]; then
+    mkdir -p "${QBTLOGPATH}"
+    chown -R "${PUID}":"${PGID}" /config/qBittorrent
+  fi
 
-	#Check for log file. If it doesn't exist, create it.
-	if [ -f "${QBTLOGPATH}${QBTLOG}" ];
-	then
-        	echo "Logging to $QBTLOGPATH$QBTLOG."
-	else
-        	echo "Log file $QBTLOGPATH$QBTLOG doesn't exist. Creating it..."
-	        touch "${QBTLOGPATH}${QBTLOG}"
-        	if [ -f "${QBTLOGPATH}${QBTLOG}" ];
-                	then
-				chown "${USER}":"${GROUP}" "${QBTLOGPATH}${QBTLOG}"
-                        	echo "Logfile created. Logging to ${QBTLOGPATH}${QBTLOG}"
-	                else
-        	                echo "Couldn't create logfile ${QBTLOGPATH}${QBTLOG}. Please investigate."
-	        fi
-	fi
+  #Check for log file. If it doesn't exist, create it.
+  if [ -f "${QBTLOGPATH}${QBTLOG}" ];
+  then
+          echo "Logging to $QBTLOGPATH$QBTLOG."
+  else
+          echo "Log file $QBTLOGPATH$QBTLOG doesn't exist. Creating it..."
+          touch "${QBTLOGPATH}${QBTLOG}"
+          if [ -f "${QBTLOGPATH}${QBTLOG}" ];
+                  then
+        chown "${USER}":"${GROUP}" "${QBTLOGPATH}${QBTLOG}"
+                          echo "Logfile created. Logging to ${QBTLOGPATH}${QBTLOG}"
+                  else
+                          echo "Couldn't create logfile ${QBTLOGPATH}${QBTLOG}. Please investigate."
+          fi
+  fi
 
         # Return
         #   0 if daemon has been started
         #   1 if daemon was already running
         #   2 if daemon could not be started
 
-	start-stop-daemon --start --chuid "${USER}":"${GROUP}" --test --quiet --make-pidfile --pidfile "${PIDFILE}" --background --exec /bin/bash -- -c "${DAEMONSTRING}" || return 1
+  start-stop-daemon --start --chuid "${USER}":"${GROUP}" --test --quiet --make-pidfile --pidfile "${PIDFILE}" --background --exec /bin/bash -- -c "${DAEMONSTRING}" || return 1
 
-	start-stop-daemon --start --chuid "${USER}":"${GROUP}" --make-pidfile --pidfile "${PIDFILE}" --background --exec /bin/bash -- -c "${DAEMONSTRING}" || return 2
-	sleep 1
-	echo "[info] Started qBittorrent daemon successfully..." | ts '%Y-%m-%d %H:%M:%.S'
+  start-stop-daemon --start --chuid "${USER}":"${GROUP}" --make-pidfile --pidfile "${PIDFILE}" --background --exec /bin/bash -- -c "${DAEMONSTRING}" || return 2
+  sleep 1
+  echo "[info] Started qBittorrent daemon successfully..." | ts '%Y-%m-%d %H:%M:%.S'
 }
 
 #
@@ -89,52 +89,52 @@ do_start()
 #
 do_stop()
 {
-	start-stop-daemon --stop --exec "${DAEMON}PATH${DAEMON}"
-	sleep 2
-	return "$?"
+  start-stop-daemon --stop --exec "${DAEMON}PATH${DAEMON}"
+  sleep 2
+  return "$?"
 }
 
 
 case "$1" in
   start)
-	[ "${VERBOSE}" != no ] && log_daemon_msg "Starting ${DESC}" "${NAME}"
-	do_start
-	case "$?" in
-		0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
-		2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
-	esac
-	;;
+  [ "${VERBOSE}" != no ] && log_daemon_msg "Starting ${DESC}" "${NAME}"
+  do_start
+  case "$?" in
+    0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
+    2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
+  esac
+  ;;
   stop)
-	[ "${VERBOSE}" != no ] && log_daemon_msg "Stopping ${DESC}" "${NAME}"
-	do_stop
-	case "$?" in
-		0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
-		2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
-	esac
-	;;
+  [ "${VERBOSE}" != no ] && log_daemon_msg "Stopping ${DESC}" "${NAME}"
+  do_stop
+  case "$?" in
+    0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
+    2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
+  esac
+  ;;
   status)
        status_of_proc "${DAEMON}" "${NAME}" && exit 0 || exit $?
        ;;
   restart|force-reload)
-	log_daemon_msg "Restarting ${DESC}" "${NAME}"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-	  	# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
+  log_daemon_msg "Restarting ${DESC}" "${NAME}"
+  do_stop
+  case "$?" in
+    0|1)
+    do_start
+    case "$?" in
+      0) log_end_msg 0 ;;
+      1) log_end_msg 1 ;; # Old process is still running
+      *) log_end_msg 1 ;; # Failed to start
+    esac
+    ;;
+    *)
+      # Failed to stop
+    log_end_msg 1
+    ;;
+  esac
+  ;;
   *)
-	echo "Usage: service qbittorrent {start|stop|status|restart|force-reload}" >&2
-	exit 3
-	;;
+  echo "Usage: service qbittorrent {start|stop|status|restart|force-reload}" >&2
+  exit 3
+  ;;
 esac
