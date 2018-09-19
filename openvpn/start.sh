@@ -21,7 +21,7 @@ else
 fi
 
 # set group users to specified group id (non unique)
-groupmod -o -g "${PGID}" users &>/dev/null
+groupmod -o -g "${PGID}" nogroup &>/dev/null
 
 # Forked from binhex's OpenVPN dockers
 set -e
