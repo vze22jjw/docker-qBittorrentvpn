@@ -22,7 +22,8 @@ DEBUG=false
 DEFAULT_GATEWAY=$(ip -4 route list 0/0 | cut -d ' ' -f 3)
 
 # strip whitespace from start and end of lan_network_item
-export LAN_NETWORK=$(echo "${LAN_NETWORK}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+LAN_NETWORK=$(echo "${LAN_NETWORK}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+export LAN_NETWORK
 
 echo "[info] Adding ${LAN_NETWORK} as route via docker eth0" | ts '%Y-%m-%d %H:%M:%.S'
 ip route add "${LAN_NETWORK}" via "${DEFAULT_GATEWAY}" dev eth0
@@ -50,7 +51,7 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	# setup route for qbittorrent webui using set-mark to route traffic for port 8080 to eth0
 	echo "8080    webui" >> /etc/iproute2/rt_tables
 	ip rule add fwmark 1 table webui
-	ip route add default via ${DEFAULT_GATEWAY} table webui
+	ip route add default via "${DEFAULT_GATEWAY}" table webui
 
 fi
 
@@ -61,19 +62,19 @@ if [[ "${DEBUG}" == "true" ]]; then
 fi
 
 # identify ip for docker bridge interface
-docker_ip=$(ifconfig "${docker_interface}" | grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")
+docker_ip=$(ifconfig "${docker_interface}" | grep -o "inet [0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*" | grep -o "[0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*")
 if [[ "${DEBUG}" == "true" ]]; then
  	echo "[debug] Docker IP defined as ${docker_ip}"
 fi
 
 # identify netmask for docker bridge interface
-docker_mask=$(ifconfig "${docker_interface}" | grep -o "netmask [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")
+docker_mask=$(ifconfig "${docker_interface}" | grep -o "netmask [0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*" | grep -o "[0-9]*\\.[0-9]*\\.[0-9]*\\.[0-9]*")
 if [[ "${DEBUG}" == "true" ]]; then
 	echo "[debug] Docker netmask defined as ${docker_mask}"
 fi
 
 # convert netmask into cidr format
-docker_network_cidr=$(ipcalc "${docker_ip}" "${docker_mask}" | grep -P -o -m 1 "(?<=Network:)\s+[^\s]+" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+docker_network_cidr=$(ipcalc "${docker_ip}" "${docker_mask}" | grep -P -o -m 1 "(?<=Network:)\\s+[^\\s]+" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
 echo "[info] Docker network defined as ${docker_network_cidr}" | ts '%Y-%m-%d %H:%M:%.S'
 
 # input iptable rules
@@ -92,22 +93,22 @@ iptables -A INPUT -i "${VPN_DEVICE_TYPE}" -j ACCEPT
 iptables -A INPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept input to vpn gateway
-iptables -A INPUT -i eth0 -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
+iptables -A INPUT -i eth0 -p "${VPN_PROTOCOL}" --sport "${VPN_PORT}" -j ACCEPT
 
 # accept input to qbittorrent webui port
 if [ -z "${WEBUI_PORT}" ]; then
 	iptables -A INPUT -i eth0 -p tcp --dport 8080 -j ACCEPT
 	iptables -A INPUT -i eth0 -p tcp --sport 8080 -j ACCEPT
 else
-	iptables -A INPUT -i eth0 -p tcp --dport ${WEBUI_PORT} -j ACCEPT
-	iptables -A INPUT -i eth0 -p tcp --sport ${WEBUI_PORT} -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --dport "${WEBUI_PORT}" -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --sport "${WEBUI_PORT}" -j ACCEPT
 fi
 
 # accept input to qbittorrent daemon port - used for lan access
 if [ -z "${INCOMING_PORT}" ]; then
 	iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport 8999 -j ACCEPT
 else
-	iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport ${INCOMING_PORT} -j ACCEPT
+	iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport "${INCOMING_PORT}" -j ACCEPT
 fi
 
 # accept input icmp (ping)
@@ -132,7 +133,7 @@ iptables -A OUTPUT -o "${VPN_DEVICE_TYPE}" -j ACCEPT
 iptables -A OUTPUT -s "${docker_network_cidr}" -d "${docker_network_cidr}" -j ACCEPT
 
 # accept output from vpn gateway
-iptables -A OUTPUT -o eth0 -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
+iptables -A OUTPUT -o eth0 -p "${VPN_PROTOCOL}" --dport "${VPN_PORT}" -j ACCEPT
 
 # if iptable mangle is available (kernel module) then use mark
 if [[ $iptable_mangle_exit_code == 0 ]]; then
@@ -142,8 +143,8 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 		iptables -t mangle -A OUTPUT -p tcp --dport 8080 -j MARK --set-mark 1
 		iptables -t mangle -A OUTPUT -p tcp --sport 8080 -j MARK --set-mark 1
 	else
-		iptables -t mangle -A OUTPUT -p tcp --dport ${WEBUI_PORT} -j MARK --set-mark 1
-		iptables -t mangle -A OUTPUT -p tcp --sport ${WEBUI_PORT} -j MARK --set-mark 1
+		iptables -t mangle -A OUTPUT -p tcp --dport "${WEBUI_PORT}" -j MARK --set-mark 1
+		iptables -t mangle -A OUTPUT -p tcp --sport "${WEBUI_PORT}" -j MARK --set-mark 1
 	fi
 fi
 
@@ -152,8 +153,8 @@ if [ -z "${WEBUI_PORT}" ]; then
 	iptables -A OUTPUT -o eth0 -p tcp --dport 8080 -j ACCEPT
 	iptables -A OUTPUT -o eth0 -p tcp --sport 8080 -j ACCEPT
 else
-	iptables -A OUTPUT -o eth0 -p tcp --dport ${WEBUI_PORT} -j ACCEPT
-	iptables -A OUTPUT -o eth0 -p tcp --sport ${WEBUI_PORT} -j ACCEPT
+	iptables -A OUTPUT -o eth0 -p tcp --dport "${WEBUI_PORT}" -j ACCEPT
+	iptables -A OUTPUT -o eth0 -p tcp --sport "${WEBUI_PORT}" -j ACCEPT
 fi
 
 # accept output to qBittorrent daemon port - used for lan access
@@ -161,7 +162,7 @@ if [ -z "${INCOMING_PORT}" ]; then
 	iptables -A OUTPUT -o eth0 -d "${LAN_NETWORK}" -p tcp --sport 8999 -j ACCEPT
 else
 	echo "[info] Incoming connections port defined as ${INCOMING_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
-	iptables -A OUTPUT -o eth0 -d "${LAN_NETWORK}" -p tcp --sport ${INCOMING_PORT} -j ACCEPT
+	iptables -A OUTPUT -o eth0 -d "${LAN_NETWORK}" -p tcp --sport "${INCOMING_PORT}" -j ACCEPT
 fi
 
 # accept output for icmp (ping)
