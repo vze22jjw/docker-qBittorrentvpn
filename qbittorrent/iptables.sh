@@ -109,8 +109,6 @@ if [ -z "${INCOMING_PORT}" ]; then
 else
 	iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport ${INCOMING_PORT} -j ACCEPT
 fi
-	
-
 
 # accept input icmp (ping)
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
@@ -147,7 +145,6 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 		iptables -t mangle -A OUTPUT -p tcp --dport ${WEBUI_PORT} -j MARK --set-mark 1
 		iptables -t mangle -A OUTPUT -p tcp --sport ${WEBUI_PORT} -j MARK --set-mark 1
 	fi
-	
 fi
 
 # accept output from qBittorrent webui port - used for lan access

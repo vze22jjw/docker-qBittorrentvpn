@@ -55,7 +55,7 @@ do_start()
 		mkdir -p $QBTLOGPATH
 		chown -R ${PUID}:${PGID} /config/qBittorrent
 	fi
-	
+
 	#Check for log file. If it doesn't exist, create it.
 	if [ -f $QBTLOGPATH$QBTLOG ];
 	then
