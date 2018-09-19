@@ -45,12 +45,12 @@ echo "[info] Starting qBittorrent daemon..." | ts '%Y-%m-%d %H:%M:%.S'
 chmod -R 755 /config/qBittorrent
 
 sleep 1
-qbpid=$(pgrep -o -x qbittorrent-nox) 
-echo "[info] qBittorrent PID: $qbpid" | ts '%Y-%m-%d %H:%M:%.S'
+qbpid=$(pgrep -o -x qbittorrent-nox)
+echo "[info] qBittorrent PID: ${qbpid}" | ts '%Y-%m-%d %H:%M:%.S'
 
 if [ -e "/proc/${qbpid}" ]; then
   if [[ -e /config/qBittorrent/data/logs/qbittorrent.log ]]; then
-    chmod 775 /config/qBittorrent/data/logs/qbittorrent.log
+    chmod 664 /config/qBittorrent/data/logs/qbittorrent.log
   fi
   sleep infinity
 else
