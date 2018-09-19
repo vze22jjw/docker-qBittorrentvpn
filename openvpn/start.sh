@@ -1,4 +1,28 @@
 #!/bin/bash
+export PUID=$(echo "${PUID}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+
+if [[ ! -z "${PUID}" ]]; then
+  echo "[info] PUID defined as '${PUID}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+  echo "[warn] PUID not defined (via -e PUID), defaulting to '99'" | ts '%Y-%m-%d %H:%M:%.S'
+  export PUID="99"
+fi
+
+# set user nobody to specified user id (non unique)
+usermod -o -u "${PUID}" nobody &>/dev/null
+
+export PGID=$(echo "${PGID}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+
+if [[ ! -z "${PGID}" ]]; then
+  echo "[info] PGID defined as '${PGID}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+  echo "[warn] PGID not defined (via -e PGID), defaulting to '100'" | ts '%Y-%m-%d %H:%M:%.S'
+  export PGID="65534"
+fi
+
+# set group users to specified group id (non unique)
+groupmod -o -g "${PGID}" users &>/dev/null
+
 # Forked from binhex's OpenVPN dockers
 set -e
 
