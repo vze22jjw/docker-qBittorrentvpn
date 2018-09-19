@@ -57,19 +57,17 @@ do_start()
   fi
 
   #Check for log file. If it doesn't exist, create it.
-  if [ -f "${QBTLOGPATH}${QBTLOG}" ];
-  then
-          echo "Logging to $QBTLOGPATH$QBTLOG."
+  if [ -f "${QBTLOGPATH}${QBTLOG}" ]; then
+    echo "Logging to $QBTLOGPATH$QBTLOG."
   else
-          echo "Log file $QBTLOGPATH$QBTLOG doesn't exist. Creating it..."
-          touch "${QBTLOGPATH}${QBTLOG}"
-          if [ -f "${QBTLOGPATH}${QBTLOG}" ];
-                  then
-        chown "${USER}":"${GROUP}" "${QBTLOGPATH}${QBTLOG}"
-                          echo "Logfile created. Logging to ${QBTLOGPATH}${QBTLOG}"
-                  else
-                          echo "Couldn't create logfile ${QBTLOGPATH}${QBTLOG}. Please investigate."
-          fi
+    echo "Log file $QBTLOGPATH$QBTLOG doesn't exist. Creating it..."
+    touch "${QBTLOGPATH}${QBTLOG}"
+    if [ -f "${QBTLOGPATH}${QBTLOG}" ]; then
+      chown "${USER}":"${GROUP}" "${QBTLOGPATH}${QBTLOG}"
+      echo "Logfile created. Logging to ${QBTLOGPATH}${QBTLOG}"
+    else
+      echo "Couldn't create logfile ${QBTLOGPATH}${QBTLOG}. Please investigate."
+    fi
   fi
 
         # Return
