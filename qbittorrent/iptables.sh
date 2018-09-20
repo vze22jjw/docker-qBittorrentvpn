@@ -11,8 +11,6 @@ while : ; do
   fi
 done
 
-echo "[info] WebUI port defined as ${WEBUI_PORT}" | ts '%Y-%m-%d %H:%M:%.S'
-
 # ip route
 ###
 

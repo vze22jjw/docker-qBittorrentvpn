@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Forked from binhex's OpenVPN dockers
+set -e
+
 export PUID=$(echo "${PUID}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
 
 if [[ ! -z "${PUID}" ]]; then
@@ -22,9 +26,6 @@ fi
 
 # set group users to specified group id (non unique)
 groupmod -o -g "${PGID}" nogroup &>/dev/null
-
-# Forked from binhex's OpenVPN dockers
-set -e
 
 # check for presence of network interface docker0
 check_network=$(ifconfig | grep docker0 || true)
@@ -187,7 +188,6 @@ if [[ $VPN_ENABLED == "yes" ]]; then
   echo "[info] Starting OpenVPN..." | ts '%Y-%m-%d %H:%M:%.S'
   cd /config/openvpn
   exec openvpn --config ${VPN_CONFIG} &
-  #exec /bin/bash /etc/openvpn/openvpn.init start &
   exec /bin/bash /etc/qbittorrent/iptables.sh
 else
   exec /bin/bash /etc/qbittorrent/start.sh

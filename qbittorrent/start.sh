@@ -1,13 +1,11 @@
 #!/bin/bash
 CONF_FILE="/config/qBittorrent/config/qBittorrent.conf"
 
-if [[ ! -e /config/qBittorrent ]]; then
-  mkdir -p /config/qBittorrent/config/
-  chown -R "${PUID}":"${PGID}" /config/qBittorrent
-else
-  chown -R "${PUID}":"${PGID}" /config/qBittorrent
-fi
+# Create config folder if missing
+mkdir -p /config/qBittorrent/config/
+chown -R "${PUID}":"${PGID}" /config/qBittorrent
 
+# Copy default config in place if missing.
 if [[ ! -e "${CONF_FILE}" ]]; then
   cp /etc/qbittorrent/qBittorrent.conf "${CONF_FILE}"
   chmod 644 "${CONF_FILE}"
@@ -59,7 +57,7 @@ sleep 1
 qbpid=$(pgrep -o -x qbittorrent-nox)
 echo "[info] qBittorrent PID: ${qbpid}" | ts '%Y-%m-%d %H:%M:%.S'
 
-if [ -e "/proc/${qbpid}" ]; then
+if [[ -e "/proc/${qbpid}" ]]; then
   if [[ -e /config/qBittorrent/data/logs/qbittorrent.log ]]; then
     chmod 664 /config/qBittorrent/data/logs/qbittorrent.log
   fi
