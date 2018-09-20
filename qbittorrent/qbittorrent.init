@@ -5,13 +5,12 @@
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Starts QBittorrent
-# Description:       Start qbittorrent-nox on start. Change USER= before running
+# Short-Description: Starts qBittorrent
+# Description:       Start qbittorrent-nox on start.
 ### END INIT INFO
 
 # Author: Jesper Smith
 # Edited by MarkusMcNugen
-# Edited log paths for docker, added umask and group to chuid option
 
 #Edit the user that qbittorrent-nox will run as.
 USER=${PUID}
@@ -20,7 +19,7 @@ GROUP=${PGID}
 PATH="/sbin:/usr/sbin:/bin:/usr/bin"
 SCRIPTNAME="/etc/init.d/qbittorrent"
 NAME="qbittorrent-nox"
-DESC="qBitTorrent"
+DESC="qBittorrent"
 PIDFILE="/var/run/${NAME}.pid"
 QBTLOGPATH="/config/qBittorrent/data/logs/"
 
@@ -29,7 +28,7 @@ DAEMON_ARGS="--profile=/config"
 
 export DBUS_SESSION_BUS_ADDRESS=""
 
-umask 002
+umask ${UMASK}
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
