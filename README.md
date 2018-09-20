@@ -6,13 +6,12 @@ Docker container which runs the latest headless qBittorrent client with WebUI wh
 ![alt text][preview]
 
 ## Docker Features
-* Base: Ubuntu 18.04
-* Latest qBittorrent
-* Size: 403MB
+* Base: phusion/baseimage
+* Latest stable qBittorrent
 * Selectively enable or disable OpenVPN support
 * IP tables kill switch to prevent IP leaking when VPN connection fails
 * Specify name servers to add to container
-* Configure UID and GID for config files and downloads by qBittorrent
+* Configure UID, GID and UMASK for config files and downloads by qBittorrent
 
 # Run container from Docker registry
 The container is available from the Docker registry and this is the simplest way to get it.
@@ -29,9 +28,7 @@ $ docker run --rm \
               -e "LAN_NETWORK=192.168.1.0/24" \
               -e "NAME_SERVERS=8.8.8.8,8.8.4.4" \
               -p 8080:8080 \
-              -p 8999:8999 \
-              -p 8999:8999/udp \
-              markusmcnugen/qbittorrentvpn
+              fryfrog/ubuntu-qbittorrentvpn
 ```
 
 # Variables, Volumes, and Ports
@@ -45,6 +42,7 @@ $ docker run --rm \
 |`NAME_SERVERS`| No | Comma delimited name servers |`NAME_SERVERS=8.8.8.8,8.8.4.4`|
 |`PUID`| No | UID applied to config files and downloads |`PUID=99`|
 |`PGID`| No | GID applied to config files and downloads |`PGID=65534`|
+|`UMASK` | No | UMASK applied to qBittorrent |`UMASK=022`|
 |`WEBUI_PORT`| No | Applies WebUI port to qBittorrents config at boot (Must change exposed ports to match)  |`WEBUI_PORT=8080`|
 |`INCOMING_PORT`| No | Applies Incoming port to qBittorrents config at boot (Must change exposed ports to match) |`INCOMING_PORT=8999`|
 
@@ -58,11 +56,9 @@ $ docker run --rm \
 | Port | Proto | Required | Function | Example |
 |----------|----------|----------|----------|----------|
 | `8080` | TCP | Yes | qBittorrent WebUI | `8080:8080`|
-| `8999` | TCP | Yes | qBittorrent listening port | `8999:8999`|
-| `8999` | UDP | Yes | qBittorrent listening port | `8999:8999/udp`|
 
 # Access the WebUI
-Access http://IPADDRESS:PORT from a browser on the same network.
+Access http://ipaddress:port from a browser on the same network.
 
 ## Default Credentials
 | Credential | Default Value |
@@ -101,27 +97,3 @@ id <username>
 If you are having issues with this container please submit an issue on GitHub.
 Please provide logs, docker version and other information that can simplify reproducing the issue.
 Using the latest stable verison of Docker is always recommended. Support for older version is on a best-effort basis.
-
-# Building the container yourself
-To build this container, clone the repository and cd into it.
-
-## Build it:
-```
-$ cd /repo/location/qbittorrentvpn
-$ docker build -t qbittorrentvpn .
-```
-## Run it:
-```
-$ docker run --privileged  -d \
-              -v /your/config/path/:/config \
-              -v /your/downloads/path/:/downloads \
-              -e "VPN_ENABLED=yes" \
-              -e "LAN_NETWORK=192.168.1.0/24" \
-              -e "NAME_SERVERS=8.8.8.8,8.8.4.4" \
-              -p 8080:8080 \
-              -p 8999:8999 \
-              -p 8999:8999/udp \
-              qbittorrentvpn
-```
-
-This will start a container as described in the "Run container from Docker registry" section.
