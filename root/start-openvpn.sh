@@ -3,30 +3,6 @@
 # Forked from binhex's OpenVPN dockers
 set -e
 
-export PUID=$(echo "${PUID}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
-
-if [[ ! -z "${PUID}" ]]; then
-  echo "[info] PUID defined as '${PUID}'" | ts '%Y-%m-%d %H:%M:%.S'
-else
-  echo "[warn] PUID not defined (via -e PUID), defaulting to '99'" | ts '%Y-%m-%d %H:%M:%.S'
-  export PUID="99"
-fi
-
-# set user nobody to specified user id (non unique)
-usermod -o -u "${PUID}" nobody &>/dev/null
-
-export PGID=$(echo "${PGID}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
-
-if [[ ! -z "${PGID}" ]]; then
-  echo "[info] PGID defined as '${PGID}'" | ts '%Y-%m-%d %H:%M:%.S'
-else
-  echo "[warn] PGID not defined (via -e PGID), defaulting to '100'" | ts '%Y-%m-%d %H:%M:%.S'
-  export PGID="65534"
-fi
-
-# set group users to specified group id (non unique)
-groupmod -o -g "${PGID}" nogroup &>/dev/null
-
 # check for presence of network interface docker0
 check_network=$(ifconfig | grep docker0 || true)
 
@@ -53,7 +29,7 @@ if [[ $VPN_ENABLED == "yes" ]]; then
   chmod -R 775 "/config/openvpn" &> /dev/null
   exit_code_chmod=$?
   set -e
-  if (( ${exit_code_chown} != 0 || ${exit_code_chmod} != 0 )); then
+  if (( exit_code_chown != 0 || exit_code_chmod != 0 )); then
     echo "[warn] Unable to chown/chmod /config/openvpn/, assuming SMB mountpoint" | ts '%Y-%m-%d %H:%M:%.S'
   fi
 
@@ -77,10 +53,9 @@ if [[ $VPN_ENABLED == "yes" ]]; then
     echo "${VPN_PASSWORD}" >> /config/openvpn/credentials.conf
 
     # Replace line with one that points to credentials.conf
-    auth_cred_exist=$(cat ${VPN_CONFIG} | grep -m 1 'auth-user-pass')
-    if [[ ! -z "${auth_cred_exist}" ]]; then
+    if grep -q -m 1 'auth-user-pass' "${VPN_CONFIG}"; then
       # Get line number of auth-user-pass
-      LINE_NUM=$(grep -Fn -m 1 'auth-user-pass' ${VPN_CONFIG} | cut -d: -f 1)
+      LINE_NUM=$(grep -Fn -m 1 'auth-user-pass' "${VPN_CONFIG}" | cut -d: -f 1)
       sed -i "${LINE_NUM}s/.*/auth-user-pass credentials.conf\n/" ${VPN_CONFIG}
     else
       sed -i "1s/.*/auth-user-pass credentials.conf\n/" ${VPN_CONFIG}
@@ -91,7 +66,7 @@ if [[ $VPN_ENABLED == "yes" ]]; then
   /usr/bin/dos2unix "${VPN_CONFIG}" 1> /dev/null
 
   # parse values from ovpn file
-  export vpn_remote_line=$(cat "${VPN_CONFIG}" | grep -P -o -m 1 '(?<=^remote\s)[^\n\r]+' | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+  export vpn_remote_line=$(grep -P -o -m 1 '(?<=^remote\s)[^\n\r]+' "${VPN_CONFIG}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
   if [[ ! -z "${vpn_remote_line}" ]]; then
     echo "[info] VPN remote line defined as '${vpn_remote_line}'" | ts '%Y-%m-%d %H:%M:%.S'
   else
@@ -110,7 +85,7 @@ if [[ $VPN_ENABLED == "yes" ]]; then
   else
     echo "[crit] VPN_PORT not found in ${VPN_CONFIG}, exiting..." | ts '%Y-%m-%d %H:%M:%.S' && exit 1
   fi
-  export VPN_PROTOCOL=$(cat "${VPN_CONFIG}" | grep -P -o -m 1 '(?<=^proto\s)[^\r\n]+' | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+  export VPN_PROTOCOL=$(grep -P -o -m 1 '(?<=^proto\s)[^\r\n]+' "${VPN_CONFIG}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
   if [[ ! -z "${VPN_PROTOCOL}" ]]; then
     echo "[info] VPN_PROTOCOL defined as '${VPN_PROTOCOL}'" | ts '%Y-%m-%d %H:%M:%.S'
   else
@@ -128,7 +103,7 @@ if [[ $VPN_ENABLED == "yes" ]]; then
     export VPN_PROTOCOL="tcp"
   fi
 
-  VPN_DEVICE_TYPE=$(cat "${VPN_CONFIG}" | grep -P -o -m 1 '(?<=^dev\s)[^\r\n\d]+' | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+  VPN_DEVICE_TYPE=$(grep -P -o -m 1 '(?<=^dev\s)[^\r\n\d]+' "${VPN_CONFIG}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
   if [[ ! -z "${VPN_DEVICE_TYPE}" ]]; then
     export VPN_DEVICE_TYPE="${VPN_DEVICE_TYPE}0"
     echo "[info] VPN_DEVICE_TYPE defined as '${VPN_DEVICE_TYPE}'" | ts '%Y-%m-%d %H:%M:%.S'
@@ -174,21 +149,9 @@ for name_server_item in "${name_server_list[@]}"; do
 
 done
 
-if [[ -z "${PUID}" ]]; then
-  echo "[info] PUID not defined. Defaulting to root user" | ts '%Y-%m-%d %H:%M:%.S'
-  export PUID="root"
-fi
-
-if [[ -z "${PGID}" ]]; then
-  echo "[info] PGID not defined. Defaulting to root group" | ts '%Y-%m-%d %H:%M:%.S'
-  export PGID="root"
-fi
-
 if [[ $VPN_ENABLED == "yes" ]]; then
   echo "[info] Starting OpenVPN..." | ts '%Y-%m-%d %H:%M:%.S'
   cd /config/openvpn
-  exec openvpn --config ${VPN_CONFIG} &
-  exec /bin/bash /etc/qbittorrent/iptables.sh
-else
-  exec /bin/bash /etc/qbittorrent/start.sh
+  openvpn --config "${VPN_CONFIG}" &
+  /root/iptables.sh
 fi

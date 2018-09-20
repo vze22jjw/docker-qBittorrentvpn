@@ -1,5 +1,4 @@
 # qBittorrent and OpenVPN
-#
 
 FROM ubuntu:18.04
 MAINTAINER fryfrog@gmail.com
@@ -19,10 +18,10 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add configuration and scripts
-ADD openvpn/ /etc/openvpn/
+ADD root/ /root/
 ADD qbittorrent/ /etc/qbittorrent/
 
-RUN chmod +x /etc/qbittorrent/*.sh /etc/qbittorrent/*.init /etc/openvpn/*.sh
+RUN chmod +x /root/*.sh /etc/qbittorrent/*.init
 
 # Expose ports and run
 EXPOSE 8080
@@ -30,4 +29,4 @@ EXPOSE 8999
 EXPOSE 8999/udp
 
 # Start it all up
-CMD ["/bin/bash", "/etc/openvpn/start.sh"]
+CMD ["/bin/bash", "/root/start.sh"]

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 CONF_FILE="/config/qBittorrent/config/qBittorrent.conf"
 
 # Create config folder if missing
@@ -55,13 +56,9 @@ echo "[info] Starting qBittorrent daemon..." | ts '%Y-%m-%d %H:%M:%.S'
 
 sleep 1
 qbpid=$(pgrep -o -x qbittorrent-nox)
-echo "[info] qBittorrent PID: ${qbpid}" | ts '%Y-%m-%d %H:%M:%.S'
 
-if [[ -e "/proc/${qbpid}" ]]; then
-  if [[ -e /config/qBittorrent/data/logs/qbittorrent.log ]]; then
-    chmod 664 /config/qBittorrent/data/logs/qbittorrent.log
-  fi
-  sleep infinity
+if [[ -n ${qbpid} ]]; then
+  echo "[info] qBittorrent PID: ${qbpid}" | ts '%Y-%m-%d %H:%M:%.S'
 else
-  echo "qBittorrent failed to start!"
+  echo "[error] qBittorrent failed to start!"
 fi
