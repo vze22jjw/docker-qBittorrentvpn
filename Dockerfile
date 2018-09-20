@@ -1,6 +1,5 @@
 # qBittorrent and OpenVPN
-
-FROM ubuntu:18.04
+FROM phusion/baseimage:0.11
 MAINTAINER fryfrog@gmail.com
 
 VOLUME /downloads
