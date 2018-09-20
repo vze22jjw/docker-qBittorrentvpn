@@ -53,7 +53,7 @@ if [[ -n "${INCOMING_PORT}" ]]; then
 fi
 
 echo "[info] Starting qBittorrent daemon..." | ts '%Y-%m-%d %H:%M:%.S'
-/bin/bash /etc/qbittorrent/qbittorrent.init start
+/etc/qbittorrent/qbittorrent.init start
 
 sleep 1
 qbpid=$(pgrep -o -x qbittorrent-nox)

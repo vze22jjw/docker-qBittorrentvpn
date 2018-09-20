@@ -1,16 +1,13 @@
 # qBittorrent and OpenVPN
 #
-# Version 1.8
 
 FROM ubuntu:18.04
-MAINTAINER MarkusMcNugen
+MAINTAINER fryfrog@gmail.com
 
 VOLUME /downloads
 VOLUME /config
 
 ENV DEBIAN_FRONTEND noninteractive
-
-RUN usermod -u 99 nobody
 
 # Update packages and install software
 RUN apt-get update && \
@@ -31,4 +28,6 @@ RUN chmod +x /etc/qbittorrent/*.sh /etc/qbittorrent/*.init /etc/openvpn/*.sh
 EXPOSE 8080
 EXPOSE 8999
 EXPOSE 8999/udp
+
+# Start it all up
 CMD ["/bin/bash", "/etc/openvpn/start.sh"]
