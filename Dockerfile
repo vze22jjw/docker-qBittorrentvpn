@@ -1,6 +1,6 @@
 # qBittorrent and OpenVPN
 FROM phusion/baseimage:0.11
-MAINTAINER fryfrog@gmail.com
+MAINTAINER MarkusMcNugen
 
 VOLUME /downloads
 VOLUME /config
