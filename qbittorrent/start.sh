@@ -48,7 +48,7 @@ if [ ! -z "${WEBUI_PORT}" ]; then
 		if [[ ! -z "${webui_exist}" ]]; then
 			# Get line number of WebUI Port
 			LINE_NUM=$(grep -Fn -m 1 'WebUI\Port' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
-			sed -i "${LINE_NUM}s@.*@WebUI\\Port=${WEBUI_PORT}@" /config/qBittorrent/config/qBittorrent.conf
+			sed -i "${LINE_NUM}s@.*@WebUI\\\Port=${WEBUI_PORT}@" /config/qBittorrent/config/qBittorrent.conf
 		else
 			echo "WebUI\Port=${WEBUI_PORT}" >> /config/qBittorrent/config/qBittorrent.conf
 		fi
