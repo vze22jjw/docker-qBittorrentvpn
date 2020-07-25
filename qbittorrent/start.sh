@@ -62,7 +62,7 @@ if [ ! -z "${INCOMING_PORT}" ]; then
 		if [[ ! -z "${incoming_exist}" ]]; then
 			# Get line number of Incoming
 			LINE_NUM=$(grep -Fn -m 1 'Connection\PortRangeMin' /config/qBittorrent/config/qBittorrent.conf | cut -d: -f 1)
-			sed -i "${LINE_NUM}s@.*@Connection\\PortRangeMin=${INCOMING_PORT}@" /config/qBittorrent/config/qBittorrent.conf
+			sed -i "${LINE_NUM}s@.*@Connection\\\PortRangeMin=${INCOMING_PORT}@" /config/qBittorrent/config/qBittorrent.conf
 		else
 			echo "Connection\PortRangeMin=${INCOMING_PORT}" >> /config/qBittorrent/config/qBittorrent.conf
 		fi
