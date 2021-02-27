@@ -11,6 +11,12 @@ if [[ ! -e /config/qBittorrent/config/qBittorrent.conf ]]; then
 	chmod 755 /config/qBittorrent/config/qBittorrent.conf
 fi
 
+#VPN HealthCheck here
+if [[ ! -e /config/openvpn/health_check.sh ]]; then
+	/bin/cp /etc/openvpn/health_check.sh /config/openvpn/health_check.sh
+	chmod 755 /config/openvpn/health_check.sh
+fi
+
 ## Check for missing group
 /bin/egrep  -i "^${PGID}:" /etc/passwd
 if [ $? -eq 0 ]; then
